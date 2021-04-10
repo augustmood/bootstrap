@@ -6,6 +6,12 @@
  */
 
 import Data from './dom/data'
+import {
+  emulateTransitionEnd,
+  execute,
+  getTransitionDurationFromElement
+} from './util/index'
+import EventHandler from './dom/event-handler'
 
 /**
  * ------------------------------------------------------------------------
@@ -30,6 +36,18 @@ class BaseComponent {
   dispose() {
     Data.remove(this._element, this.constructor.DATA_KEY)
     this._element = null
+  }
+
+  _executeCallback(callback, element, isAnimated = false) {
+    if (!isAnimated) {
+      execute(callback)
+      return
+    }
+
+    const transitionDuration = getTransitionDurationFromElement(element)
+    EventHandler.one(element, 'transitionend', () => execute(callback))
+
+    emulateTransitionEnd(element, transitionDuration)
   }
 
   /** Static */
